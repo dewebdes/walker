@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IPOZAL Map Walker</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #origin-input,
+      #destination-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 200px;
+      }
+
+      #origin-input:focus,
+      #destination-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #mode-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        margin-left: 12px;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #mode-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+    </style>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script>
+        jQuery(document).ready(function(){
+            jQuery('#map2').height(jQuery(document).height());
+        });
+    </script>
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+    <style>
+.navbar {
+  overflow: hidden;
+  background-color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.dropdown {
+  float: left;
+  overflow: hidden;
+}
+
+.dropdown .dropbtn {
+  cursor: pointer;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn, .dropbtn:focus {
+  background-color: red;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  float: none;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.show {
+  display: block;
+}
+</style>
+
+</head>
+<body>
+
+<div style="text-align:center;position:fixed;top:0px;left:0px;width:100%;z-index:1000000;" id="menudv">
+    <img src="menu48.png" onclick="toggletools();">
+</div>
+
+
+<div class="navbarcon" style="background-color:rgb(51,51,51,0.6);position:fixed!important;top:0px;left:0px;width:100%;z-index:1000000!important;">
+<div id="navmain" class="navbar" style="background-color:rgb(51,51,51,0.6);">
+
+    <a href="#home" style="float:left!important;pointer-events:none;">Tracking</a>
+    <label class="switch" style="float:left!important;margin-top:6px;">
+        <input id="trackchb" type="checkbox" checked>
+        <span class="slider round"></span>
+    </label>
+
+
+
+    <a href="#home" onclick="toggledirections();">Directions</a>
+    <a href="#news" onclick="showHotels();">Hotels</a>
+    <div class="dropdown">
+        <button class="dropbtn" onclick="myFunction()">Near Me
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content" id="myDropdown" style="max-height:300px;overflow:scroll;">
+            <a href="#" onclick="show_beauty_salon();">Beauty Salon</a>
+            <a href="#" onclick="show_bowling_alley();">Bowling Alley</a>
+            <a href="#" onclick="show_cafe();">Cafe</a>
+
+            <a href="#" onclick="show_car_rental();">Car Rental</a>
+            <a href="#" onclick="show_clothing_store();">Clothing Store</a>
+            <a href="#" onclick="show_dentist();">Dentist</a>
+            <a href="#" onclick="show_doctor();">Doctor</a>
+            <a href="#" onclick="show_gym();">GYM.</a>
+            <a href="#" onclick="show_hair_care();">Hair Care</a>
+            <a href="#" onclick="show_hospital();">hospital</a>
+            <a href="#" onclick="show_jewelry_store();">Jewelry Store</a>
+            <a href="#" onclick="show_meal_takeaway();">Meal Takeaway</a>
+            <a href="#" onclick="show_movie_theater();">Movie Theater</a>
+            <a href="#" onclick="show_museum();">Museum</a>
+            <a href="#" onclick="show_park();">Park</a>
+            <a href="#" onclick="show_beauty_parking();">Parking</a>
+            <a href="#" onclick="show_pharmacy();">Pharmacy</a>
+            <a href="#" onclick="show_police();">Police</a>
+            <a href="#" onclick="show_post_office();">Post Office</a>
+            <a href="#" onclick="show_restaurant();">Restaurant</a>
+            <a href="#" onclick="show_shoe_store();">Shoe Store</a>
+            <a href="#" onclick="show_shopping_mall();">Shopping Mall</a>
+            <a href="#" onclick="show_spa();">SPA.</a>
+            <a href="#" onclick="show_stadium();">Stadium</a>
+            <a href="#" onclick="show_store();">Store</a>
+            <a href="#" onclick="show_supermarket();">SuperMarket</a>
+
+            <a href="#" onclick="show_taxi_stand();">Taxi Stand</a>
+            <!--<a href="#" onclick="show_travel_agency();">Travel Agency</a>
+            <a href="#" onclick="show_supermarket();">SuperMarket</a>
+            <a href="#" onclick="show_supermarket();">SuperMarket</a>-->
+
+        </div>
+
+
+
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn" onclick="myFunction()">Get Me ...
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content" id="myDropdown2" style="max-height:300px;overflow:scroll;">
+
+        <a href="#news" onclick="show_embassy();">Embassy</a>
+    <a href="#news" onclick="show_amusement_park();">Amusement Park</a>
+    <a href="#news" onclick="show_city_hall();">City Hall</a>
+    <a href="#news" onclick="show_airport();">Airport</a>
+    <a href="#news" onclick="show_train_station();">Train Station</a>
+    <a href="#news" onclick="show_veterinary_care();">Veterinary Care</a>
+    <a href="#news" onclick="show_zoo();">Zoo</a>
+    <!--<a href="#news" onclick="showHotels();">Hotels</a>
+    <a href="#news" onclick="showHotels();">Hotels</a>
+
+    <a href="#news" onclick="showHotels();">Hotels</a>-->
+        </div>
+    </div>
+</div>
+</div>
+
+
+<script>
+    function show_beauty_salon(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['beauty_salon']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_bowling_alley(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['bowling_alley']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_cafe(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['cafe']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_car_rental(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['car_rental']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_clothing_store(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['clothing_store']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_dentist(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['dentist']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_doctor(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['doctor']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_embassy(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['embassy']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_amusement_park(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['amusement_park']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_city_hall(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['city_hall']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_airport(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['airport']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_gym(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['gym']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_hair_care(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['hair_care']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_hospital(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['hospital']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_jewelry_store(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['jewelry_store']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_meal_takeaway(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['meal_takeaway']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_movie_theater(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['movie_theater']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_museum(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['museum']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_park(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['park']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_parking(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['parking']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_pharmacy(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['pharmacy']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_police(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['police']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+    function show_post_office(){
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['post_office']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+    }
+
+function show_restaurant(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['restaurant']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+function show_shoe_store(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['shoe_store']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+function show_shopping_mall(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['shopping_mall']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+function show_spa(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['spa']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+function show_store(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['store']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+function show_supermarket(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['supermarket']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+
+function show_taxi_stand(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: ['taxi_stand']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+function show_train_station(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['train_station']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+//function show_travel_agency(){}
+function show_zoo(){
+    var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 10000, type: ['travel_agency']},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            createMarkers(results);
+      });
+}
+//function show_supermarket(){}
+
+</script>
+
+<script>
+
+
+var dotrack = true;
+
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(e) {
+  if (!e.target.matches('.dropbtn')) {
+  var myDropdown = document.getElementById("myDropdown");
+    if (myDropdown.classList.contains('show')) {
+      myDropdown.classList.remove('show');
+    }
+  }
+}
+
+var directvis = false;
+function toggledirections(){
+    if(directvis == false){
+        directvis = true;
+        showdirections();
+        toggletools();
+        jQuery('#menudv').css('text-align','right');
+    }
+}
+
+function setupme(){
+    hidedirections();
+    hidenavbar();
+    showmenudv();
+}
+var navshow = false;
+function toggletools(){
+    jQuery('#menudv').css('text-align','center');
+    if(navshow == false){
+        navshow = true;
+        jQuery('.navbarcon').slideDown();
+        //jQuery('#menudv').css('top',jQuery('#menudv').css('top')+jQuery('.navbarcon').height()+'px');//.position.top()
+
+
+        var offsetTop = $('#navmain').height();//.offset().top;
+        //var footerOffsetTop = $('.footer').offset().top;
+        $('#menudv').animate({top:offsetTop , opacity: 0.5},300);
+
+        hidedirections();
+
+    }else{
+        navshow = false;
+        jQuery('.navbarcon').slideUp();
+        $('#menudv').animate({top:0 , opacity: 1},300);
+    }
+}
+function hidenavbar(){
+    jQuery('.navbarcon').hide();
+    //jQuery('#navbarcon').hide();
+}
+function showmenudv(){
+    jQuery('#menudv').fadeIn();//.show();
+}
+function hidedirections(){
+    jQuery('#origin-input').hide();
+    jQuery('#destination-input').hide();
+    jQuery('#mode-selector').hide();
+    //jQuery('#destination-input').hide();
+    //jQuery('#destination-input').hide();
+    directvis = false;
+}
+function showdirections(){
+    jQuery('#origin-input').show();
+    jQuery('#destination-input').show();
+    jQuery('#mode-selector').show();
+    //jQuery('#destination-input').hide();
+    //jQuery('#destination-input').hide();
+
+}
+</script>
+
+
+
+
+
+<div id="lastpos" style="position:fixed;bottom:0px;left:0px;width:100%;height:50px;z-index:10000;text-align:center;font-weight: bold;">
+
+</div>
+
+<div style="display: none" id="directionsdv">
+    <input id="origin-input" class="controls" type="text"
+           placeholder="Enter an origin location">
+
+    <input id="destination-input" class="controls" type="text"
+           placeholder="Enter a destination location">
+
+    <div id="mode-selector" class="controls">
+        <input type="radio" name="type" id="changemode-walking" checked="checked">
+        <label for="changemode-walking">Walking</label>
+
+        <input type="radio" name="type" id="changemode-transit">
+        <label for="changemode-transit">Transit</label>
+
+        <input type="radio" name="type" id="changemode-driving">
+        <label for="changemode-driving">Driving</label>
+    </div>
+</div>
+<style>
+    #origin-input {
+         position:fixed!important;
+         top:30px!important;
+         left:0px!important;
+         background-color: rgba(255,255,255,1);
+    }
+    #destination-input {
+         position:fixed!important;
+         top:70px!important;
+         left:0px!important;
+         background-color: rgba(255,255,255,1);
+    }
+    #mode-selector {
+         position:fixed!important;
+         top:0px!important;
+         left:0px!important;
+         width:100%!important;
+         background-color: rgba(77,144,254,1);
+         padding:0px 0px 0px 0px!important;
+         margin:0px 0px 0px 0px!important;
+         padding-top:5px!important;
+    }
+    .gm-fullscreen-control{
+        display:none!important;
+    }
+</style>
+<div id="map"></div>
+
+<script>
+var map;
+        var marker;
+ var service;
+      var infowindow;
+// This example requires the Places library. Include the libraries=places
+// parameter when you first load the API. For example:
+// <script
+// src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
+var latestlatlang;
+
+function initMap() {
+    var myLatLng = { lat: 35.718201, lng: 51.365862 };
+    infowindow = new google.maps.InfoWindow();
+   map = new google.maps.Map(document.getElementById('map'), {
+    mapTypeControl: false,
+    center: myLatLng,
+    zoom: 13
+  });
+
+  /*var request = {
+          query: 'Museum of Contemporary Art Australia',
+          fields: ['name', 'geometry'],
+        };
+
+        service = new google.maps.places.PlacesService(map);
+service.findPlaceFromQuery(request, function(results, status) {
+          if (status === google.maps.places.PlacesServiceStatus.OK) {
+            for (var i = 0; i < results.length; i++) {
+              createMarker(results[i]);
+            }
+
+            map.setCenter(results[0].geometry.location);
+          }
+        });*/
+
+  latestlatlang = myLatLng;
+
+    marker = new google.maps.Marker({
+                map: map,
+                draggable: true,
+                animation: google.maps.Animation.DROP,
+                position: myLatLng
+            });
+            marker.addListener('click', toggleBounce);
+
+  new AutocompleteDirectionsHandler(map);
+
+
+
+}
+
+function createMarker(place) {
+        var marker = new google.maps.Marker({
+          map: map,
+          position: place.geometry.location
+        });
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.setContent(place.name);
+          infowindow.open(map, this);
+        });
+      }
+
+function toggleBounce() {
+            if (marker.getAnimation() !== null) {
+                marker.setAnimation(null);
+            } else {
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+            }
+        }
+
+/**
+ * @constructor
+ */
+function AutocompleteDirectionsHandler(map) {
+  this.map = map;
+  this.originPlaceId = null;
+  this.destinationPlaceId = null;
+  this.travelMode = 'WALKING';
+  this.directionsService = new google.maps.DirectionsService;
+  this.directionsDisplay = new google.maps.DirectionsRenderer;
+  this.directionsDisplay.setMap(map);
+
+  var originInput = document.getElementById('origin-input');
+  var destinationInput = document.getElementById('destination-input');
+  var modeSelector = document.getElementById('mode-selector');
+
+  var originAutocomplete = new google.maps.places.Autocomplete(originInput);
+  // Specify just the place data fields that you need.
+  originAutocomplete.setFields(['place_id']);
+
+  var destinationAutocomplete =
+      new google.maps.places.Autocomplete(destinationInput);
+  // Specify just the place data fields that you need.
+  destinationAutocomplete.setFields(['place_id']);
+
+  this.setupClickListener('changemode-walking', 'WALKING');
+  this.setupClickListener('changemode-transit', 'TRANSIT');
+  this.setupClickListener('changemode-driving', 'DRIVING');
+
+  this.setupPlaceChangedListener(originAutocomplete, 'ORIG');
+  this.setupPlaceChangedListener(destinationAutocomplete, 'DEST');
+
+  this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
+  this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+      destinationInput);
+  this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(modeSelector);
+
+
+  setupme();
+
+}
+
+// Sets a listener on a radio button to change the filter type on Places
+// Autocomplete.
+AutocompleteDirectionsHandler.prototype.setupClickListener = function(
+    id, mode) {
+  var radioButton = document.getElementById(id);
+  var me = this;
+
+  radioButton.addEventListener('click', function() {
+    me.travelMode = mode;
+    me.route();
+  });
+};
+
+AutocompleteDirectionsHandler.prototype.setupPlaceChangedListener = function(
+    autocomplete, mode) {
+  var me = this;
+  autocomplete.bindTo('bounds', this.map);
+
+  autocomplete.addListener('place_changed', function() {
+    var place = autocomplete.getPlace();
+
+    if (!place.place_id) {
+      window.alert('Please select an option from the dropdown list.');
+      return;
+    }
+    if (mode === 'ORIG') {
+      me.originPlaceId = place.place_id;
+    } else {
+      me.destinationPlaceId = place.place_id;
+    }
+    me.route();
+  });
+};
+
+AutocompleteDirectionsHandler.prototype.route = function() {
+  if (!this.originPlaceId || !this.destinationPlaceId) {
+    return;
+  }
+  var me = this;
+
+  this.directionsService.route(
+      {
+        origin: {'placeId': this.originPlaceId},
+        destination: {'placeId': this.destinationPlaceId},
+        travelMode: this.travelMode
+      },
+      function(response, status) {
+        if (status === 'OK') {
+          me.directionsDisplay.setDirections(response);
+        } else {
+          window.alert('Directions request failed due to ' + status);
+        }
+      });
+};
+
+
+var fcall = false;
+function updateMap(dt){
+        var infos = dt.split('#np#');
+        //jQuery('#positions').prepend(jQuery("<div>"+infos[0]+" - "+infos[1]+"</div>"));
+        //go2('maper');
+
+        if(fcall == false){
+            var latlng = new google.maps.LatLng(infos[0], infos[1]);
+            marker.setPosition(latlng);
+            fcall = true;
+            //var latlng = new google.maps.LatLng(position[0], position[1]);
+            map.setCenter(latlng);
+            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+        }else{
+            //var callar = new Array();
+            //callar[0] =
+            transition(infos);
+        }
+
+}
+
+
+var numDeltas = 100;
+var delay = 10; //milliseconds
+var i = 0;
+var deltaLat;
+var deltaLng;
+function transition(result){
+    jQuery('#lastpos').html(result[0] + " - " + result[1]);
+    //i = 0;
+    //deltaLat = (result[0] - position[0])/numDeltas;
+    //deltaLng = (result[1] - position[1])/numDeltas;
+    //moveMarker();
+
+dotrack = jQuery("#trackchb").prop("checked");// == false
+if(dotrack == true){
+
+    var latlng = new google.maps.LatLng(result[0], result[1]);
+    marker.setPosition(latlng);
+    map.setCenter(latlng);
+    map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+}
+
+}
+
+
+function moveMarker(){
+    position[0] += deltaLat;
+    position[1] += deltaLng;
+    var latlng = new google.maps.LatLng(position[0], position[1]);
+    latestlatlang = latlng;
+    marker.setPosition(latlng);
+
+
+    map.setCenter(latlng);
+    map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+
+    if(i!=numDeltas){
+        i++;
+        setTimeout(moveMarker, delay);
+    }
+}
+function sendMsg(m) {
+           // app.makeToast(m, "123");
+           try{
+           JSInterface.changeActivity(m);
+           }catch(ex){}
+    }
+
+
+
+
+
+function showHotels(){
+    var service = new google.maps.places.PlacesService(map);
+    service.nearbySearch(
+      {location: latestlatlang, radius: 10000, type: ['lodging']},
+      function(results, status, pagination) {
+        if (status !== 'OK') return;
+
+        createMarkers(results);
+        //moreButton.disabled = !pagination.hasNextPage;
+        //getNextPage = pagination.hasNextPage && function() {
+          //pagination.nextPage();
+        //};
+      });
+}
+
+var markerar = new Array();
+function createMarkers(places) {
+  var bounds = new google.maps.LatLngBounds();
+  //var placesList = document.getElementById('places');
+
+  for (var i = 0, place; place = places[i]; i++) {
+    var image = {
+      url: place.icon,
+      size: new google.maps.Size(71, 71),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(17, 34),
+      scaledSize: new google.maps.Size(25, 25)
+    };
+
+    /*var request = {
+          query: 'Museum of Contemporary Art Australia',
+          fields: ['name', 'geometry'],
+        };
+*/
+    var marker = new google.maps.Marker({map: map,icon: image,title: place.name,position: place.geometry.location});
+    markerar[markerar.length] = marker;
+console.log(place.name);
+
+//jQuery(marker).click(console.log(place.name));
+
+    google.maps.event.addListener((new google.maps.Marker({map: map,icon: image,pid: place.place_id,adr: place.location,title: place.name,position: place.geometry.location})), 'click', function() {
+        //infowindow.setContent(this.title);
+              infowindow.setContent('<div><strong>' + this.title + '</strong><br>' +
+                'Place ID: ' + this.pid + '<br>' +
+                this.position + '</div>');
+              infowindow.open(map, this);
+            });
+
+
+    //var li = document.createElement('li');
+    //li.textContent = place.name;
+    //placesList.appendChild(li);
+
+    bounds.extend(place.geometry.location);
+  }
+  map.fitBounds(bounds);
+}
+
+
+
+    </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7zFBdoZ2O0c7ynofe2iJIeUF_zPrx8l0&libraries=places&callback=initMap"
+        async defer></script>
+
+
+ <div class="swipe-element" style="position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:1000000;">
+   <div class="swipe-front" style="width:100%;height:100%;position:relative;">
+   <img style="position:absolute;bottom:0px;left:0px; display:block;" id="img-0" src="./jsk-0.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-center" src="./jsk-1.png" />
+   
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-down" src="./jsk-down.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-down-left" src="./jsk-down-left.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-down-right" src="./jsk-down-right.png" />
+   
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-left" src="./jsk-left.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-right" src="./jsk-right.png" />
+   
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-top" src="./jsk-top.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-top-left" src="./jsk-top-left.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-top-right" src="./jsk-top-right.png" />
+   
+   </div>
+    </div>
+
+    <script>
+    
+    var posar=new Array();
+    function posvar(x,y){
+      this.x=x;
+      this.y=y;
+    }
+    
+      // Shim for requestAnimationFrame from Paul Irishpaul ir
+      // http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
+      window.requestAnimFrame = (function(){
+        'use strict';
+
+        return  window.requestAnimationFrame       ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame    ||
+                function( callback ){
+                  window.setTimeout(callback, 1000 / 60);
+                };
+      })();
+
+      /* // [START pointereventsupport] */
+      var pointerDownName = 'pointerdown';
+      var pointerUpName = 'pointerup';
+      var pointerMoveName = 'pointermove';
+
+      if(window.navigator.msPointerEnabled) {
+        pointerDownName = 'MSPointerDown';
+        pointerUpName = 'MSPointerUp';
+        pointerMoveName = 'MSPointerMove';
+      }
+
+      // Simple way to check if some form of pointerevents is enabled or not
+      window.PointerEventsSupport = false;
+      if(window.PointerEvent || window.navigator.msPointerEnabled) {
+        window.PointerEventsSupport = true;
+      }
+      /* // [END pointereventsupport] */
+
+      function SwipeRevealItem(element) {
+        'use strict';
+
+        // Gloabl state variables
+        var STATE_DEFAULT = 1;
+        var STATE_LEFT_SIDE = 2;
+        var STATE_RIGHT_SIDE = 3;
+
+        var swipeFrontElement = element.querySelector('.swipe-front');
+        var rafPending = false;
+        var initialTouchPos = null;
+        var lastTouchPos = null;
+        var currentXPosition = 0;
+        var currentState = STATE_DEFAULT;
+        var handleSize = 10;
+
+        // Perform client width here as this can be expensive and doens't
+        // change until window.onresize
+        var itemWidth = swipeFrontElement.clientWidth;
+        var slopValue = itemWidth * (1/4);
+
+        // On resize, change the slop value
+        this.resize = function() {
+          itemWidth = swipeFrontElement.clientWidth;
+          slopValue = itemWidth * (1/4);
+        };
+
+        /* // [START handle-start-gesture] */
+        // Handle the start of gestures
+        this.handleGestureStart = function(evt) {
+          evt.preventDefault();
+
+          if(evt.touches && evt.touches.length > 1) {
+            return;
+          }
+
+          // Add the move and end listeners
+          if (window.PointerEvent) {
+            evt.target.setPointerCapture(evt.pointerId);
+          } else {
+            // Add Mouse Listeners
+            document.addEventListener('mousemove', this.handleGestureMove, true);
+            document.addEventListener('mouseup', this.handleGestureEnd, true);
+          }
+
+          initialTouchPos = getGesturePointFromEvent(evt);
+
+          //swipeFrontElement.style.transition = 'initial';
+        }.bind(this);
+        /* // [END handle-start-gesture] */
+
+        // Handle move gestures
+        //
+        /* // [START handle-move] */
+        this.handleGestureMove = function (evt) {
+        //console.log(evt.movementX+" - "+evt.movementY);
+        var nc=new posvar(evt.movementX,evt.movementY);
+        posar[posar.length]=nc;
+        
+          evt.preventDefault();
+
+          if(!initialTouchPos) {
+            return;
+          }
+
+          lastTouchPos = getGesturePointFromEvent(evt);
+
+          if(rafPending) {
+            return;
+          }
+
+          rafPending = true;
+
+          window.requestAnimFrame(onAnimFrame);
+        }.bind(this);
+        /* // [END handle-move] */
+
+        /* // [START handle-end-gesture] */
+        // Handle end gestures
+        this.handleGestureEnd = function(evt) {
+        //console.log(evt);
+          evt.preventDefault();
+
+          if(evt.touches && evt.touches.length > 0) {
+            return;
+          }
+
+          rafPending = false;
+
+          // Remove Event Listeners
+          if (window.PointerEvent) {
+            evt.target.releasePointerCapture(evt.pointerId);
+          } else {
+            // Remove Mouse Listeners
+            document.removeEventListener('mousemove', this.handleGestureMove, true);
+            document.removeEventListener('mouseup', this.handleGestureEnd, true);
+          }
+
+  
+
+          updateSwipeRestPosition();
+
+          initialTouchPos = null;
+        }.bind(this);
+        /* // [END handle-end-gesture] */
+
+        function updateSwipeRestPosition() {
+          var differenceInX = initialTouchPos.x - lastTouchPos.x;
+          currentXPosition = currentXPosition - differenceInX;
+
+          // Go to the default state and change
+          var newState = STATE_DEFAULT;
+
+          // Check if we need to change state to left or right based on slop value
+          if(Math.abs(differenceInX) > slopValue) {
+            if(currentState === STATE_DEFAULT) {
+              if(differenceInX > 0) {
+                newState = STATE_LEFT_SIDE;
+              } else {
+                newState = STATE_RIGHT_SIDE;
+              }
+            } else {
+              if(currentState === STATE_LEFT_SIDE && differenceInX > 0) {
+                newState = STATE_DEFAULT;
+              } else if(currentState === STATE_RIGHT_SIDE && differenceInX < 0) {
+                newState = STATE_DEFAULT;
+              }
+            }
+          } else {
+            newState = currentState;
+          }
+
+          changeState(newState);
+
+          //swipeFrontElement.style.transition = 'all 150ms ease-out';
+        }
+
+        function changeState(newState) {
+          var transformStyle;
+          switch(newState) {
+            case STATE_DEFAULT:
+              currentXPosition = 0;
+              break;
+            case STATE_LEFT_SIDE:
+              currentXPosition = -(itemWidth - handleSize);
+              break;
+            case STATE_RIGHT_SIDE:
+              currentXPosition = itemWidth - handleSize;
+              break;
+          }
+
+          transformStyle = 'translateX('+currentXPosition+'px)';
+
+          //swipeFrontElement.style.msTransform = transformStyle;
+          //swipeFrontElement.style.MozTransform = transformStyle;
+          //swipeFrontElement.style.webkitTransform = transformStyle;
+          //swipeFrontElement.style.transform = transformStyle;
+
+          currentState = newState;
+        }
+
+        function getGesturePointFromEvent(evt) {
+          var point = {};
+
+          if(evt.targetTouches) {
+            point.x = evt.targetTouches[0].clientX;
+            point.y = evt.targetTouches[0].clientY;
+          } else {
+            // Either Mouse event or Pointer Event
+            point.x = evt.clientX;
+            point.y = evt.clientY;
+          }
+
+          return point;
+        }
+
+        /* // [START on-anim-frame] */
+        function onAnimFrame() {
+          if(!rafPending) {
+            return;
+          }
+
+          var differenceInX = initialTouchPos.x - lastTouchPos.x;
+
+          var newXTransform = (currentXPosition - differenceInX)+'px';
+          var transformStyle = 'translateX('+newXTransform+')';
+          //swipeFrontElement.style.webkitTransform = transformStyle;
+          //swipeFrontElement.style.MozTransform = transformStyle;
+          //swipeFrontElement.style.msTransform = transformStyle;
+          //swipeFrontElement.style.transform = transformStyle;
+
+          rafPending = false;
+        }
+        /* // [END on-anim-frame] */
+
+        /* // [START addlisteners] */
+        // Check if pointer events are supported.
+        if (window.PointerEvent) {
+          // Add Pointer Event Listener
+          swipeFrontElement.addEventListener('pointerdown', this.handleGestureStart, true);
+          swipeFrontElement.addEventListener('pointermove', this.handleGestureMove, true);
+          swipeFrontElement.addEventListener('pointerup', this.handleGestureEnd, true);
+          swipeFrontElement.addEventListener('pointercancel', this.handleGestureEnd, true);
+        } else {
+          // Add Touch Listener
+          swipeFrontElement.addEventListener('touchstart', this.handleGestureStart, true);
+          swipeFrontElement.addEventListener('touchmove', this.handleGestureMove, true);
+          swipeFrontElement.addEventListener('touchend', this.handleGestureEnd, true);
+          swipeFrontElement.addEventListener('touchcancel', this.handleGestureEnd, true);
+
+          // Add Mouse Listener
+          swipeFrontElement.addEventListener('mousedown', this.handleGestureStart, true);
+        }
+        /* // [END addlisteners] */
+      }
+
+      var swipeRevealItems = [];
+
+      window.onload = function () {
+        'use strict';
+        var swipeRevealItemElements = document.querySelectorAll('.swipe-element');
+        for(var i = 0; i < swipeRevealItemElements.length; i++) {
+          swipeRevealItems.push(new SwipeRevealItem(swipeRevealItemElements[i]));
+        }
+
+        // We do this so :active pseudo classes are applied.
+        window.onload = function() {
+          if(/iP(hone|ad)/.test(window.navigator.userAgent)) {
+            document.body.addEventListener('touchstart', function() {}, false);
+          }
+        };
+      };
+
+      window.onresize = function () {
+        'use strict';
+        for(var i = 0; i < swipeRevealItems.length; i++) {
+          swipeRevealItems[i].resize();
+        }
+      };
+    </script>
+
+    <script>
+      var registerInteraction = function () {
+        'use strict';
+        window.sampleCompleted('touch-demo-1.html-SwipeFrontTouch');
+      };
+
+      var swipeFronts = document.querySelectorAll('.swipe-front');
+      for(var i = 0; i < swipeFronts.length; i++) {
+        swipeFronts[i].addEventListener('touchstart', registerInteraction);
+      }
+      
+      
+      var lapos="center";
+      var prevpos;
+      function updatelpos(){
+      prevpos=lapos;
+        var x1=posar[posar.length-1].x;
+        var y1=posar[posar.length-1].y;
+        if((x1<0) && (y1>0)){lapos="down-left";}
+        if((x1==0) && (y1>0)){lapos="down";}
+        if((x1>0) && (y1>0)){lapos="down-right";}
+        
+        if((x1<0) && (y1==0)){lapos="left";}
+        if((x1==0) && (y1==0)){lapos="center";}
+        if((x1>0) && (y1==0)){lapos="right";}
+        
+        if((x1<0) && (y1<0)){lapos="top-left";}
+        if((x1==0) && (y1<0)){lapos="top";}
+        if((x1>0) && (y1<0)){lapos="top-right";}
+        
+        console.log(lapos);
+        if(prevpos != lapos){
+        document.getElementById('img-'+prevpos).style.display = "none";
+        }
+        document.getElementById('img-'+lapos).style.display = "block";
+        
+      }
+      setInterval(updatelpos,300);
+      
+    </script>
+
+    
+
+</body>
+</html>
