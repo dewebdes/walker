@@ -4,12 +4,89 @@
     <title>IPOZAL Map Walker</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    
   </head>
   <body>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7zFBdoZ2O0c7ynofe2iJIeUF_zPrx8l0"></script>
+    <div style="position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:2147483631;display: none;" id="tabsdv">
+      <table style="width:100%;height:100%;"><tr><td style="text-align: center;vertical-align: middle;">
+<div id="navbartab" class="w3-bar w3-black">
+    <button class="w3-bar-item w3-button tablink w3-red" onclick="openCity(event,'nearplaces')">Nearby Places</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openCity(event,'getfar')">Get Me FAR</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openCity(event,'pages')">Pages</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openCity(event,'trakme')">Track ME</button>
+    <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+  </div>
+
+<div id="nearplaces" class="w3-container w3-display-container city">
+  <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+  <h2>PLACES</h2>
+  <p id="pls">London is the capital city of England.</p>
+  <button onclick="getAllPlaces();">save</button>
+</div>
+
+<div id="getfar" class="w3-container w3-display-container city" style="display:none">
+  <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+  <h2>Paris</h2>
+  <p>Paris is the capital of France.</p> 
+</div>
+
+<div id="pages" class="w3-container w3-display-container city" style="display:none">
+  <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+  <h2>Tokyo</h2>
+  <p>Tokyo is the capital of Japan.</p>
+</div>
+<div id="trakme" class="w3-container w3-display-container city" style="display:none">
+  <span onclick="this.parentElement.style.display='none'"
+  class="w3-button w3-large w3-display-topright">&times;</span>
+  <h2>Tokyo</h2>
+  <p>Tokyo is the capital of Japan.</p>
+</div>
+</td></tr></table>
+</div>
+<script>
+  var socket;
+function openCity0(cityName) {
+  var i;
+  var x = document.getElementsByClassName("city");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";  
+  }
+  document.getElementById(cityName).style.display = "block";  
+}
+function openCity(evt, cityName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("city");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " w3-red";
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7zFBdoZ2O0c7ynofe2iJIeUF_zPrx8l0&libraries=geometry,places"></script>
 <script>
 var position = [51.227306, 6.782243];
+var latestlatlang = {lat:position[0],lng:position[1]};
+var map;
+try{
+var ar0=window.location.href.split('?')[1].split(',');
+latestlatlang = {lat:Number(ar0[0]),lng:Number(ar0[1])};
+}catch(ex){
+  position = [51.227306, 6.782243];
+  latestlatlang = {lat:position[0],lng:position[1]};
 
+}
+position[0]=latestlatlang.lat;
+position[1]=latestlatlang.lng;
 function initialize() {
    var latlng = new google.maps.LatLng(position[0], position[1]);
    var myOptions = {
@@ -27,6 +104,7 @@ function initialize() {
 
    google.maps.event.addListener(map, 'click', function(event) {
        var result = [event.latLng.lat(), event.latLng.lng()];
+       latestlatlang={lat:result[0],lng:result[1]};
        transition(result);
    });
 }
@@ -59,6 +137,116 @@ function moveMarker(){
        setTimeout(moveMarker, delay);
    }
 }
+var latestplaces;
+function getAllPlaces(){
+  console.log("get all places");
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(
+        {location: latestlatlang, radius: 500, type: []},
+        function(results, status, pagination) {
+            if (status !== 'OK') return;
+            latestplaces=results;
+            //$('#pls').text(results);
+            //----save places-----
+            //$('span.edit a').click(function (event) {//var new_post = prompt('', $('#shoutbox_comment_' + id).html());
+
+    //if (new_post != '' && new_post != null && new_post != $('#shoutbox_comment_' + id).html()) {
+      var resstr="";
+      for(var i=0;i<=results.length-1;i++){
+//lat: 
+resstr=resstr + latestplaces[i].geometry.location.lat.apply()+"nnpp";
+//lng: 
+resstr=resstr + latestplaces[i].geometry.location.lng.apply()+"nnpp";
+//id: 
+resstr=resstr + latestplaces[i].id+"nnpp";
+//name: 
+resstr=resstr + latestplaces[i].name+"nnpp";
+//placeid: 
+resstr=resstr + latestplaces[i].place_id+"nnpp";
+//types: 
+resstr=resstr + latestplaces[i].types.join()+"nnpp";
+//vicinity: 
+resstr=resstr + latestplaces[i].vicinity+"nndd";
+      }
+      var url="https://ipozal.com/form.php?cmd=saveplaces";
+        var form = $(
+            '<form action="' + url + '" method="post">' +
+            '<input type="hidden" name="baselat" value="' + latestlatlang.lat + '">' +
+            '<input type="hidden" name="baselng" value="' + latestlatlang.lng + '">' +
+            '<input type="hidden" name="info" value="' + resstr + '">' +
+            '<input type="submit">' +
+            '</form>'
+        );
+        //$('body').append(form);
+        var dt=form.serialize();
+        console.log(dt);
+        //socket.emit()
+        socket.emit("saveplaces",dt);
+        $('#tabsdv').hide();
+        /*$.ajax({
+            type: 'post',
+            url: url,
+            data: form.serialize(),async: false,
+         success : function(text)
+         {
+             $('#pls').text(text);
+         }
+        });*/
+
+       // $('#shoutbox_container').load('../../website/inc/views/shoutbox/shoutbox.php?p=' + $(this).parent().attr('id'));
+    //} else if (new_post != null) {
+      //  alert("Your post could not be edited. Make sure that your comment is not blank and that you've made changes.");
+    //}
+//});
+            //--------------------
+            createMarkers(results);
+      });
+}
+var markerar = new Array();
+function createMarkers(places) {
+  var bounds = new google.maps.LatLngBounds();
+  //var placesList = document.getElementById('places');
+
+  for (var i = 0, place; place = places[i]; i++) {
+    var image = {
+      url: place.icon,
+      size: new google.maps.Size(71, 71),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(17, 34),
+      scaledSize: new google.maps.Size(25, 25)
+    };
+
+    /*var request = {
+          query: 'Museum of Contemporary Art Australia',
+          fields: ['name', 'geometry'],
+        };
+*/
+    var marker = new google.maps.Marker({map: map,icon: image,title: place.name,position: place.geometry.location});
+    markerar[markerar.length] = marker;
+console.log(place.name);
+
+//jQuery(marker).click(console.log(place.name));
+
+    google.maps.event.addListener((new google.maps.Marker({map: map,icon: image,pid: place.place_id,adr: place.location,title: place.name,position: place.geometry.location})), 'click', function() {
+        //infowindow.setContent(this.title);
+             try{
+              infowindow.setContent('<div><strong>' + this.title + '</strong><br>' +
+                'Place ID: ' + this.pid + '<br>' +
+                this.position + '</div>');
+              infowindow.open(map, this);
+              }catch{}
+            });
+
+
+    //var li = document.createElement('li');
+    //li.textContent = place.name;
+    //placesList.appendChild(li);
+
+    bounds.extend(place.geometry.location);
+  }
+  map.fitBounds(bounds);
+}
+
 </script>
 <div id="mapCanvas"></div>
 <style>
@@ -70,6 +258,141 @@ function moveMarker(){
     left: 0px;
 
 }
+.swipe-front img{
+  max-width: 100%!important;
+  height: auto!important;
+}
 </style>
+<div class="swipe-element" style="position:fixed;bottom:0px;left:0px;width:20%;height:20%;z-index:2147483632;">
+   <div class="swipe-front" style="width:100%;height:100%;position:relative;" id="joystik">
+   <img style="position:absolute;bottom:0px;left:0px; display:block;" id="img-0" src="./jsk-0.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-center" src="./jsk-1.png" />
+   
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-down" src="./jsk-down.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-down-left" src="./jsk-down-left.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-down-right" src="./jsk-down-right.png" />
+   
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-left" src="./jsk-left.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-right" src="./jsk-right.png" />
+   
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-top" src="./jsk-top.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-top-left" src="./jsk-top-left.png" />
+   <img style="position:absolute;bottom:0px;left:0px; display:none;" id="img-top-right" src="./jsk-top-right.png" />
+   
+   </div>
+    </div>
+    <script type="text/javascript">
+      var els=document.querySelectorAll('.swipe-front img');
+      for(var i=0;i<=els.length-1;i++){
+      els[i].addEventListener('click touchstart', function(event) {
+    console.log(event);
+  });
+    }
+    // Register touchstart and touchend listeners for element 'source'
+var src = document.getElementById("img-0");
+var clientX, clientY;
+
+src.addEventListener('touchstart', function(e) {
+  // Cache the client X/Y coordinates
+  clientX = e.touches[0].clientX;
+  clientY = e.touches[0].clientY;
+}, false);
+src.addEventListener('click', function(e) {
+  // Cache the client X/Y coordinates
+  //console.log(e);
+  clientX = e.pageX;//touches[0].clientX;
+  clientY = e.pageY;//.touches[0].clientY;
+}, false);
+
+
+      var lapos="";//"center";
+      var indown=false;
+      var prevpos;
+      function isziro(d){
+        return (Math.abs(d)<10);
+      }
+      function updatelpos(){
+        prevpos=lapos;
+        //offsetHeight
+        var dh=document.getElementById('mapCanvas').offsetHeight;
+        var dw=src.offsetWidth;
+
+        //console.log((clientX) + " - " + (src.offsetHeight+(clientY-dh)));
+        var dx=clientX;
+        var dy=(src.offsetHeight+(clientY-dh));
+        var dw2=dw;
+        var dh2=src.offsetHeight;
+
+if((dx<(dw2/2)) && (dy<(dh2/2))){lapos="top-left";}
+if((dx>(dw2/2)) && (dy<(dh2/2))){lapos="top-right";}
+if(isziro(dx-(dw2/2)) && (dy<(dh2/2))){lapos="top";}
+
+if((dx<(dw2/2)) && isziro(dy-(dh2/2))){lapos="left";}
+if((dx>(dw2/2)) && isziro(dy-(dh2/2))){lapos="right";}
+if(isziro(dx-(dw2/2)) && isziro(dy-(dh2/2))){lapos="center";}
+
+if((dx<(dw2/2)) && (dy>(dh2/2))){lapos="down-left";}
+if((dx>(dw2/2)) && (dy>(dh2/2))){lapos="down-right";}
+if(isziro(dx-(dw2/2)) && (dy>(dh2/2))){lapos="down";}
+
+
+      //  if(indown==false)return;
+      
+      /*  var x1=posar[posar.length-1].x;
+        var y1=posar[posar.length-1].y;
+        if((x1<0) && (y1>0)){lapos="down-left";}
+        if((x1==0) && (y1>0)){lapos="down";}
+        if((x1>0) && (y1>0)){lapos="down-right";}
+        
+        if((x1<0) && (y1==0)){lapos="left";}
+        if((x1==0) && (y1==0)){lapos="center";}
+        if((x1>0) && (y1==0)){lapos="right";}
+        
+        if((x1<0) && (y1<0)){lapos="top-left";}
+        if((x1==0) && (y1<0)){lapos="top";}
+        if((x1>0) && (y1<0)){lapos="top-right";}
+        */
+        console.log(lapos);
+        if(prevpos != lapos){
+        document.getElementById('img-'+prevpos).style.display = "none";
+        //updatecenter(x1,y1);
+          switch(lapos){
+            case "center":
+            document.getElementById('tabsdv').style.display = "block";
+            document.getElementById('navbartab').style.display = "block";
+            
+            break;
+          }
+        }
+        try{
+        document.getElementById('img-'+lapos).style.display = "block";
+        src = document.getElementById('img-'+lapos);
+
+        
+
+src.addEventListener('touchstart', function(e) {
+  // Cache the client X/Y coordinates
+  clientX = e.touches[0].clientX;
+  clientY = e.touches[0].clientY;
+}, false);
+src.addEventListener('click', function(e) {
+  // Cache the client X/Y coordinates
+  //console.log(e);
+  clientX = e.pageX;//touches[0].clientX;
+  clientY = e.pageY;//.touches[0].clientY;
+}, false);
+//lapos="";
+}catch(ex){}
+        
+      }
+      setInterval(updatelpos,300);
+
+function startlistencpr(){}
+    </script><!--
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ipozal.com/socket.io.js"></script>
+    <script type="text/javascript" src="https://ipozal.com/chat.js?"></script>
+
 </body>
 </html>
